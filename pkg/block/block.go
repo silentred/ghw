@@ -97,6 +97,7 @@ const (
 	STORAGE_CONTROLLER_VIRTIO                    // Virtualized storage controller/driver
 	STORAGE_CONTROLLER_MMC                       // Multi-media controller (used for mobile phone storage devices)
 	STORAGE_CONTROLLER_LOOP                      // loop device
+	STORAGE_CONTROLLER_ALINVME                   // alinvme
 )
 
 var (
@@ -108,6 +109,7 @@ var (
 		STORAGE_CONTROLLER_VIRTIO:  "virtio",
 		STORAGE_CONTROLLER_MMC:     "MMC",
 		STORAGE_CONTROLLER_LOOP:    "loop",
+		STORAGE_CONTROLLER_ALINVME: "AliNVMe",
 	}
 
 	// NOTE(fromani): the keys are all lowercase and do not match
@@ -123,6 +125,7 @@ var (
 		"virtio":  STORAGE_CONTROLLER_VIRTIO,
 		"mmc":     STORAGE_CONTROLLER_MMC,
 		"loop":    STORAGE_CONTROLLER_LOOP,
+		"alinvme": STORAGE_CONTROLLER_ALINVME,
 	}
 )
 
