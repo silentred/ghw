@@ -131,6 +131,8 @@ const (
 	StorageControllerMMC
 	// StorageControllerLoop indicates a loopback storage controller
 	StorageControllerLoop
+	// StorageControllerAliNVMe indicates a virtual NVMe managed by SPDK
+	StorageControllerAliNVMe
 )
 
 const (
@@ -159,6 +161,7 @@ var (
 		StorageControllerVirtIO:  "virtio",
 		StorageControllerMMC:     "MMC",
 		StorageControllerLoop:    "loop",
+		StorageControllerAliNVMe: "AliNVMe",
 	}
 
 	// NOTE(fromani): the keys are all lowercase and do not match
@@ -174,6 +177,7 @@ var (
 		"virtio":  StorageControllerVirtIO,
 		"mmc":     StorageControllerMMC,
 		"loop":    StorageControllerLoop,
+		"alinvme": StorageControllerAliNVMe,
 	}
 )
 

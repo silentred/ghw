@@ -341,6 +341,19 @@ func disks(ctx *context.Context, paths *linuxpath.Paths) []*Disk {
 		wwnNoExtension := diskWWNNoExtension(paths, dname)
 		removable := diskIsRemovable(paths, dname)
 
+		// get info of alinvme
+		if storageController == StorageControllerAliNVMe {
+			// skip alinvme0c0n1
+			if skipAliNVMe(paths, dname) {
+				continue
+			}
+			// read sn, model, nqn
+			nvmeInfo := getAliNVMeInfo(paths, dname)
+			serialNo = nvmeInfo.SerialNumber
+			wwn = nvmeInfo.NQN
+			model = nvmeInfo.Model
+		}
+
 		if storageController == STORAGE_CONTROLLER_LOOP && size == 0 {
 			// We don't care about unused loop devices...
 			continue
@@ -410,6 +423,9 @@ func diskTypes(dname string) (
 	} else if strings.HasPrefix(dname, "loop") {
 		driveType = DriveTypeVirtual
 		storageController = StorageControllerLoop
+	} else if strings.HasPrefix(dname, "alinvme") {
+		driveType = DriveTypeSSD
+		storageController = StorageControllerAliNVMe
 	}
 
 	return driveType, storageController
@@ -518,4 +534,44 @@ func parseMountEntry(line string) *mountEntry {
 	opts := strings.Split(fields[3], ",")
 	res.Options = opts
 	return res
+}
+
+type NVMeInfo struct {
+	SerialNumber string
+	NQN          string
+	Model        string
+}
+
+func getAliNVMeInfo(paths *linuxpath.Paths, dname string) (info NVMeInfo) {
+	snPath := filepath.Join(paths.SysBlock, dname, "device", "serial")
+	contents, err := os.ReadFile(snPath)
+	if err != nil {
+		info.SerialNumber = util.UNKNOWN
+	}
+	info.SerialNumber = strings.TrimSpace(string(contents))
+
+	modelPath := filepath.Join(paths.SysBlock, dname, "device", "model")
+	contents, err = os.ReadFile(modelPath)
+	if err != nil {
+		info.Model = util.UNKNOWN
+	}
+	info.Model = strings.TrimSpace(string(contents))
+
+	nqnPath := filepath.Join(paths.SysBlock, dname, "device", "subsysnqn")
+	contents, err = os.ReadFile(nqnPath)
+	if err != nil {
+		info.NQN = util.UNKNOWN
+	}
+	info.NQN = strings.TrimSpace(string(contents))
+
+	return
+}
+
+func skipAliNVMe(paths *linuxpath.Paths, dname string) bool {
+	devPath := filepath.Join(paths.SysBlock, dname, "dev")
+	_, err := os.Stat(devPath)
+	if os.IsNotExist(err) {
+		return true
+	}
+	return err != nil
 }
